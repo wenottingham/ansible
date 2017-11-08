@@ -240,7 +240,12 @@ def main():
     svn = Subversion(module, dest, repo, revision, username, password, svn_path)
 
     if not export and not update and not checkout:
-        module.exit_json(changed=False, after=svn.get_remote_revision())
+        localrepo, localrev = svn.get_revision()
+        if localrepo == (repo[:-1] if repo.endswith('/') else repo):
+            before = localrev
+        else:
+            before = None
+        module.exit_json(changed=False, before=before, after=svn.get_remote_revision())
     if export or not os.path.exists(dest):
         before = None
         local_mods = False
